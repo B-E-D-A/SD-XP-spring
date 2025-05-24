@@ -1,0 +1,57 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group 'org.chat'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.rabbitmq:amqp-client:5.16.0'
+    implementation 'org.slf4j:slf4j-simple:2.0.7'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.mockito:mockito-core:5.12.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.12.0'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+application {
+    mainClass = 'org.chat.Main'
+}
+
+tasks.withType(JavaExec) {
+    systemProperty "host", System.getProperty("host", "localhost")
+    systemProperty "channel", System.getProperty("channel", "general")
+}
+
+tasks.named('jar') {
+    archiveFileName = "chat-app.jar"
+    manifest {
+        attributes('Main-Class': 'org.chat.Main')
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+shadowJar {
+    archiveBaseName = 'chat-app'
+    archiveClassifier = ''
+    archiveVersion = ''
+    manifest {
+        attributes 'Main-Class': 'org.chat.Main'
+    }
+}
+
+tasks.build.dependsOn tasks.shadowJar
